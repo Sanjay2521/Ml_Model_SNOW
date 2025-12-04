@@ -1,0 +1,200 @@
+# Configuration file for ML Model SNOW
+
+# Data Configuration
+data:
+  raw_path: "data/raw/"
+  processed_path: "data/processed/"
+  train_split: 0.8
+  val_split: 0.1
+  test_split: 0.1
+  random_state: 42
+
+  # Input files
+  incident_csv: "AnyConv.com__incident (1).csv"
+  kpi_excel: "AMS_ACC_Incident_KPIs (1).xlsx"
+
+  # Target column
+  target_column: "assignment_group"  # Change this based on your data
+
+  # Text columns to process
+  text_columns:
+    - "short_description"
+    - "description"
+    - "close_notes"
+
+# Preprocessing Configuration
+preprocessing:
+  lowercase: true
+  remove_special_chars: true
+  remove_stop_words: true
+  remove_urls: true
+  remove_emails: true
+  remove_phone_numbers: true
+  remove_file_paths: true
+  remove_extra_spaces: true
+  handle_duplicates: true
+  min_text_length: 3
+
+# Feature Engineering Configuration
+features:
+  # Vectorization methods (choose one or more)
+  vectorizers:
+    count:
+      enabled: true
+      max_features: 5000
+      ngram_range: [1, 2]
+
+    tfidf:
+      enabled: true
+      max_features: 5000
+      ngram_range: [1, 2]
+      min_df: 2
+      max_df: 0.95
+
+    word2vec:
+      enabled: true
+      vector_size: 100
+      window: 5
+      min_count: 2
+      workers: 4
+
+  # NLP Features
+  nlp_features:
+    pos_tagging: true
+    ner: true
+    sentiment: false
+
+  # Additional features
+  additional_features:
+    - "priority"
+    - "impact"
+    - "urgency"
+    - "category"
+
+# Model Configuration
+models:
+  # Traditional ML Models
+  traditional:
+    logistic_regression:
+      enabled: true
+      max_iter: 1000
+      solver: 'lbfgs'
+      multi_class: 'auto'
+
+    random_forest:
+      enabled: true
+      n_estimators: 100
+      max_depth: null
+      min_samples_split: 2
+      n_jobs: -1
+
+    svm:
+      enabled: true
+      kernel: 'rbf'
+      C: 1.0
+      probability: true
+
+    naive_bayes:
+      enabled: true
+
+    knn:
+      enabled: true
+      n_neighbors: 5
+      weights: 'uniform'
+
+    decision_tree:
+      enabled: true
+      max_depth: null
+      min_samples_split: 2
+
+    gradient_boosting:
+      enabled: true
+      n_estimators: 100
+      learning_rate: 0.1
+      max_depth: 3
+
+    sgd:
+      enabled: true
+      loss: 'log_loss'
+      max_iter: 1000
+
+  # Deep Learning Models
+  deep_learning:
+    dnn:
+      enabled: true
+      hidden_layers: [256, 128, 64]
+      dropout: 0.3
+      activation: 'relu'
+      optimizer: 'adam'
+      epochs: 50
+      batch_size: 32
+
+    lstm:
+      enabled: true
+      lstm_units: [128, 64]
+      dropout: 0.2
+      recurrent_dropout: 0.2
+      epochs: 50
+      batch_size: 32
+      max_sequence_length: 200
+
+    rnn:
+      enabled: true
+      rnn_units: [128, 64]
+      dropout: 0.2
+      epochs: 50
+      batch_size: 32
+
+  # Ensemble
+  ensemble:
+    enabled: true
+    method: 'voting'  # 'voting' or 'stacking'
+    voting_type: 'soft'
+
+# Training Configuration
+training:
+  cross_validation: true
+  cv_folds: 5
+  scoring: 'f1_weighted'
+  hyperparameter_tuning: true
+  tuning_method: 'grid'  # 'grid' or 'random'
+  n_jobs: -1
+  verbose: 1
+
+# Evaluation Metrics
+evaluation:
+  metrics:
+    - accuracy
+    - precision
+    - recall
+    - f1_score
+    - cohen_kappa
+    - confusion_matrix
+    - classification_report
+
+  plot_results: true
+  save_reports: true
+
+# Output Configuration
+output:
+  models_path: "models/saved_models/"
+  checkpoints_path: "models/checkpoints/"
+  plots_path: "results/plots/"
+  reports_path: "results/reports/"
+  logs_path: "results/logs/"
+
+  save_best_model: true
+  model_format: 'pickle'  # 'pickle' or 'joblib'
+
+# Logging
+logging:
+  level: 'INFO'  # DEBUG, INFO, WARNING, ERROR
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  file: 'results/logs/training.log'
+
+# API Configuration (for deployment)
+api:
+  host: '0.0.0.0'
+  port: 5000
+  debug: false
+  model_path: 'models/saved_models/best_model.pkl'
