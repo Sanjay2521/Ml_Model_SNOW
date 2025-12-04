@@ -1,0 +1,125 @@
+Shopping Agent - Project Structure
+===================================
+
+shopping-agent/
+│
+├── 📄 README.md                  - Comprehensive documentation
+├── 📄 QUICKSTART.md              - Quick setup guide (5 min setup)
+├── 📄 LICENSE                    - MIT License
+├── 📄 PROJECT_STRUCTURE.txt      - This file
+│
+├── 🔧 Configuration Files
+│   ├── requirements.txt          - Python dependencies
+│   ├── .env.example              - Environment variables template
+│   ├── .gitignore                - Git ignore rules
+│   ├── config.py                 - Application configuration
+│
+├── 🚀 Setup Scripts
+│   ├── setup.sh                  - Linux/Mac setup script
+│   └── setup.bat                 - Windows setup script
+│
+├── 🤖 Core Agent Files
+│   ├── main.py                   - Main entry point (CLI)
+│   ├── shopping_agent.py         - Shopping agent orchestrator
+│   ├── claude_client.py          - Claude AI integration
+│   └── web_controller.py         - Playwright web automation
+│
+├── 🧪 Testing & Demo
+│   ├── demo.py                   - Interactive demo script
+│   └── test_agent.py             - System tests
+│
+└── 📸 screenshots/               - Screenshot storage
+    └── .gitkeep                  - Directory placeholder
+
+
+Key Components:
+===============
+
+1. Configuration (config.py)
+   - API keys and settings
+   - Browser configuration
+   - Agent parameters
+
+2. Claude Client (claude_client.py)
+   - Interfaces with Anthropic API
+   - Analyzes screenshots using vision
+   - Makes intelligent decisions
+   - Returns structured actions
+
+3. Web Controller (web_controller.py)
+   - Playwright browser automation
+   - Executes actions from Claude
+   - Takes screenshots
+   - Handles popups and navigation
+
+4. Shopping Agent (shopping_agent.py)
+   - Main orchestrator
+   - Implements shopping flow
+   - Coordinates Claude + Web Controller
+   - Manages state transitions
+
+
+Workflow:
+=========
+
+Homepage → Search → Product → Cart → Checkout
+    ↓         ↓        ↓       ↓        ↓
+Screenshot → Claude → Action → Execute → Repeat
+
+
+Supported Sites:
+================
+
+✓ Calvin Klein US    (calvinklein_us)
+✓ Calvin Klein CA    (calvinklein_ca)
+✓ Tommy Hilfiger US  (tommy_us)
+✓ Tommy Hilfiger CA  (tommy_ca)
++ Any custom URL
+
+
+Usage Examples:
+===============
+
+# Basic usage
+python main.py --site calvinklein_us --product "shirt" --size M
+
+# Custom URL
+python main.py --url https://www.example.com --product "jeans"
+
+# Run demo
+python demo.py
+
+# Test system
+python test_agent.py
+
+
+Dependencies:
+=============
+
+✓ anthropic          - Claude AI API
+✓ playwright         - Web automation
+✓ python-dotenv      - Environment variables
+✓ pillow             - Image processing
+✓ beautifulsoup4     - HTML parsing
+✓ pydantic           - Data validation
+
+
+Setup Steps:
+============
+
+1. Run setup script (setup.sh or setup.bat)
+2. Edit .env with your Anthropic API key
+3. Activate virtual environment
+4. Run: python main.py --site calvinklein_us --product shirt
+
+
+For Support:
+============
+
+- Read README.md for detailed documentation
+- Check QUICKSTART.md for quick setup
+- Run test_agent.py to verify installation
+- Review screenshots/ folder for debugging
+
+
+Happy Shopping! 🛍️🤖
