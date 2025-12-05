@@ -168,6 +168,45 @@ class WebController:
                     print(f"   ✓ Clicked (XPath): {selector}")
                     return True
             raise
+        except Exception:
+            raise
+
+    async def click_by_text(self, text: str, element_type: str = "button") -> bool:
+        """
+        Click element by visible text using Playwright's text selectors
+
+        Args:
+            text: The text to search for
+            element_type: Type of element (button, a, etc.)
+
+        Returns:
+            True if successful, False otherwise
+        """
+        strategies = [
+            # Try exact text match
+            lambda: self.page.get_by_role(element_type, name=text, exact=True),
+            # Try partial text match
+            lambda: self.page.get_by_role(element_type, name=text, exact=False),
+            # Try text selector with element type
+            lambda: self.page.locator(f"{element_type}:has-text('{text}')"),
+            # Try just text selector
+            lambda: self.page.get_by_text(text, exact=True),
+            # Try partial text
+            lambda: self.page.get_by_text(text, exact=False),
+        ]
+
+        for strategy in strategies:
+            try:
+                element = strategy()
+                await element.wait_for(state="visible", timeout=3000)
+                await element.click()
+                await asyncio.sleep(1.5)
+                print(f"   ✓ Clicked element with text: '{text}'")
+                return True
+            except:
+                continue
+
+        return False
 
     async def _type(self, selector: str, text: str) -> bool:
         """Type text into element"""

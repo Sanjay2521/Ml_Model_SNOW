@@ -166,33 +166,69 @@ class ShoppingAgent:
         # Get page HTML
         page_html = await self.web.get_page_html()
 
-        # Ask Claude to select size and add to cart
-        max_attempts = 3
-        for attempt in range(max_attempts):
+        # First, try to select the size using text-based clicking (more reliable for size buttons)
+        size = self.task_context.get("size", "M")
+        print(f"🎯 Attempting to select size: {size}")
+
+        # Try clicking size button by text
+        size_selected = await self.web.click_by_text(size, "button")
+
+        if not size_selected:
+            # Fallback: Ask Claude to help find the size selector
+            print(f"   ⚠ Text-based size selection failed, asking Claude for help...")
             action = self.claude.analyze_page(
                 screenshot_path=screenshot,
                 current_step="product",
                 task_context=self.task_context,
                 page_html=page_html
             )
+            size_selected = await self.web.execute_action(action)
 
-            success = await self.web.execute_action(action)
+        if not size_selected:
+            print(f"✗ Could not select size {size}")
+            return False
 
-            if success and action.get("action") != "error":
-                # Check if we've added to cart
+        # Wait for page to update after size selection
+        await asyncio.sleep(2)
+
+        # Now try to add to bag/cart
+        print("🛒 Attempting to add to bag...")
+
+        # Try common "Add to Bag" button texts
+        add_to_bag_texts = ["Add to Bag", "Add to Cart", "Add To Bag", "ADD TO BAG"]
+
+        for text in add_to_bag_texts:
+            if await self.web.click_by_text(text, "button"):
+                await asyncio.sleep(2)
                 page_text = await self.web.get_page_text()
-                if "added to bag" in page_text.lower() or "added to cart" in page_text.lower():
+                if "added to bag" in page_text.lower() or "added to cart" in page_text.lower() or "view bag" in page_text.lower():
                     print("✓ Product added to cart!")
                     return True
 
-                # Take new screenshot for next attempt
-                await asyncio.sleep(2)
-                screenshot = await self.web.take_screenshot(f"product_attempt_{attempt + 1}")
-                page_html = await self.web.get_page_html()
-            else:
-                if attempt < max_attempts - 1:
-                    print(f"⚠ Attempt {attempt + 1} failed, retrying...")
-                    await asyncio.sleep(2)
+        # Fallback: Ask Claude to find and click the add to bag button
+        print("   ⚠ Text-based add to bag failed, asking Claude for help...")
+        screenshot = await self.web.take_screenshot("product_add_to_bag")
+        page_html = await self.web.get_page_html()
+
+        # Update context to focus on adding to bag
+        bag_context = self.task_context.copy()
+        bag_context["goal"] = f"Click the 'Add to Bag' or 'Add to Cart' button. Size {size} should already be selected."
+
+        action = self.claude.analyze_page(
+            screenshot_path=screenshot,
+            current_step="product",
+            task_context=bag_context,
+            page_html=page_html
+        )
+
+        success = await self.web.execute_action(action)
+
+        if success:
+            await asyncio.sleep(2)
+            page_text = await self.web.get_page_text()
+            if "added to bag" in page_text.lower() or "added to cart" in page_text.lower():
+                print("✓ Product added to cart!")
+                return True
 
         return True  # Continue even if we're not sure
 
