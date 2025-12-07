@@ -208,6 +208,23 @@ class WebController:
 
         return False
 
+    async def select_size_intelligently(self, size: str) -> bool:
+        """
+        Use intelligent size selector with multiple fallback strategies
+
+        Args:
+            size: Size to select (e.g., "M", "L", "XL")
+
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            from intelligent_size_selector import select_size_intelligently
+            return await select_size_intelligently(self.page, size)
+        except Exception as e:
+            print(f"   ✗ Intelligent selector error: {str(e)}")
+            return False
+
     async def _type(self, selector: str, text: str) -> bool:
         """Type text into element"""
         try:
